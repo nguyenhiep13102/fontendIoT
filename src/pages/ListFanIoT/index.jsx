@@ -102,12 +102,12 @@ const ListFanIoT = () => {
       
 
                 <Space>
-                  <Button
+                  {/* <Button
                     type="primary"
                     onClick={() => navigate(`/iot/${fan._id}`)}
                   >
                     Xem chi tiết
-                  </Button>
+                  </Button> */}
 
                   <Button
                     onClick={() => navigate(`/RemodeFan/${fan._id}`)}
@@ -116,7 +116,7 @@ const ListFanIoT = () => {
                   </Button>
 
                   <Button
-                    onClick={() => navigate(`/FanBarChart`)}
+                    onClick={() => navigate(`/FanBarChart/${fan.FAN_ID}`)}
                   >
                     biểu đồ hoạt động 
 

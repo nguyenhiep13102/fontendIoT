@@ -29,7 +29,7 @@ export const routes =[
     isShowHeader: true,
     },
     {
-    path: '/FanBarChart',
+    path: '/FanBarChart/:id',
     page :FanBarChart,
     isShowHeader: true,
     },

@@ -53,7 +53,7 @@ const FanControlPage = () => {
     mutationFn: (payload) => MyIoTService.ControllerFan(payload),
   });
 
-  /* ================= SYNC LẦN ĐẦU ================= */
+
 
   useEffect(() => {
     if (!fan || !isFirstLoad.current) return;

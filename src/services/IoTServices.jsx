@@ -42,9 +42,24 @@ export const ControllerFan = async (data) => {
     return error.response?.data;
   }
 };  
- 
+ export const chartFan = async (fanId) => {
+  if (!fanId) {
+    return { data: [] };
+  }
+
+  try {
+    const res = await axios.get(
+      `${env.API_URL}/fanroute/chart/${fanId}`
+    );
+    return res.data ?? { data: [] };
+  } catch (error) {
+    console.error('chartFan error', error);
+    return { data: [] }; // ✅ BẮT BUỘC
+  }
+};
 export default {
     GetDeviceInformation,
     getMyIoT,
     GetfanbyId,
+    chartFan,
 }
