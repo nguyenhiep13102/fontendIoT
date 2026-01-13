@@ -57,9 +57,20 @@ export const ControllerFan = async (data) => {
     return { data: [] }; // ✅ BẮT BUỘC
   }
 };
+export const modelAuto = async (fanId) => {
+  try {
+    const res = await axios.post(`${env.API_URL}/fanroute/SettingAuto/${fanId}` );
+    console.log('res service', data);
+    return res.data;
+  } catch (error) {
+    return error.response?.data;
+  }
+}; 
+
 export default {
     GetDeviceInformation,
     getMyIoT,
     GetfanbyId,
     chartFan,
+    modelAuto,
 }

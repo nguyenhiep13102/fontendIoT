@@ -17,6 +17,8 @@ import {
   CloudOutlined,
   DashboardOutlined,
   HomeOutlined,
+
+  RobotOutlined,
 } from '@ant-design/icons';
 import * as MyIoTService from '../../services/IoTServices';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -27,7 +29,7 @@ const { Title, Text } = Typography;
 const FanControlPage = () => {
   const [power, setPower] = useState(false);
   const [speed, setSpeed] = useState(0);
-  const [mode, setMode] = useState('Auto');
+  const [mode, setMode] = useState('no');
 
   const isFirstLoad = useRef(true);
 
@@ -45,9 +47,11 @@ const FanControlPage = () => {
     queryKey: ['fetchFanById', id],
     queryFn: fetchFanById,
     enabled: !!id,
+    
   });
 
   const fan = data?.data;
+
 
   const controlFanMutation = useMutation({
     mutationFn: (payload) => MyIoTService.ControllerFan(payload),
@@ -56,13 +60,12 @@ const FanControlPage = () => {
 
 
   useEffect(() => {
-    if (!fan || !isFirstLoad.current) return;
+  if (!fan) return;
+console.log('🔥 FAN FROM API:', fan);
+  setPower(fan.status === 'ON');
+  setSpeed(fan.Speed ?? 0);
+}, [fan]);
 
-    setPower(fan.status === 'ON');
-    setSpeed(fan.speed ?? 0);
-
-    isFirstLoad.current = false;
-  }, [fan]);
 
   /* ================= HANDLER ================= */
 
@@ -103,6 +106,7 @@ const FanControlPage = () => {
   if (value === 'FAST') newSpeed = 100;
   if (value === 'BREEZE') newSpeed = 20;
   if (value === 'NORMAL') newSpeed = 50;
+  
 
   setSpeed(newSpeed);
   setPower(true);
@@ -113,8 +117,22 @@ const FanControlPage = () => {
     speed: newSpeed,
   });
 };
+const autoMutation = useMutation({
+  mutationFn: MyIoTService.modelAuto,
 
-  /* ================= UI ================= */
+  onSuccess: (data) => {
+    console.log('Auto mode success:', data);
+    setMode('Auto');
+  },
+
+  onError: (error) => {
+    console.error('Auto mode error:', error);
+  },
+});
+
+ const handleAutoMode = (fanId) => {
+  autoMutation.mutate(fanId);
+};
 
   return (
     <PageContainer>
@@ -142,6 +160,7 @@ const FanControlPage = () => {
             </Tag>
           </Col>
         </Row>
+        <div> Nhiệt độ :{fan?.TemperatureSensor} °C</div>
 
         <Divider />
 
@@ -181,22 +200,28 @@ const FanControlPage = () => {
         {/* MODE */}
         <Text strong>Chế độ</Text>
         <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
-          <Col span={8}>
+          <Col span={6}>
             <ModeButton active={mode === 'NORMAL'} onClick={() => selectMode('NORMAL')}>
               <DashboardOutlined />
               <span>Bình thường</span>
             </ModeButton>
           </Col>
-          <Col span={8}>
+          <Col span={6}>
             <ModeButton active={mode === 'FAST'} onClick={() => selectMode('FAST')}>
               <ThunderboltOutlined />
               <span>Nhanh</span>
             </ModeButton>
           </Col>
-          <Col span={8}>
+          <Col span={6}>
             <ModeButton active={mode === 'BREEZE'} onClick={() => selectMode('BREEZE')}>
               <CloudOutlined />
               <span>Gió nhẹ</span>
+            </ModeButton>
+          </Col>
+          <Col span={6}>
+            <ModeButton active={mode === 'Auto'} onClick={() => {handleAutoMode(fan.FAN_ID)}} >
+              <RobotOutlined />
+              <span>tu dong</span>
             </ModeButton>
           </Col>
         </Row>
