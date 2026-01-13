@@ -1,6 +1,6 @@
 
 import styled from "styled-components";
-import { Avatar, Badge, Button, Col, Popover, Row,  } from "antd";
+import { Avatar, Badge, Button, Col, Popover, Row, Dropdown, List, Typography   } from "antd";
 
 import * as style from './style.jsx'
 import UserService from '../../services/UserServices.jsx';
@@ -18,6 +18,8 @@ import {SearchProduct } from '../../redux/slides/ProductSide.jsx'
 import { useState } from "react";
 import Loadingcom from '../LoadingComponent/loading.jsx';
 import env from '../../../env.js'
+
+
 export const HeaderComponent = ({isHiddenSearch, isHiddentCart}) => {
      
     const navigate = useNavigate();
@@ -61,6 +63,88 @@ const onSearch = (e)=> {
 const handleSearch = () => {
     dispatch(SearchProduct(search))
 };
+
+const mockNotifications = [
+  {
+    _id: '1',
+    title: 'Đơn hàng mới',
+    description: 'Bạn có đơn hàng #1001',
+    createdAt: '2026-01-13T08:30:00',
+    isRead: false,
+  },
+  {
+    _id: '2',
+    title: 'Thanh toán thành công',
+    description: 'Đơn hàng #1000 đã thanh toán',
+    createdAt: '2026-01-13T08:10:00',
+    isRead: false,
+  },
+  {
+    _id: '3',
+    title: 'Giao hàng',
+    description: 'Đơn hàng #0999 đang giao',
+    createdAt: '2026-01-12T22:00:00',
+    isRead: true,
+  },
+  {
+    _id: '4',
+    title: 'Khuyến mãi',
+    description: 'Giảm giá 20% cho đơn tiếp theo',
+    createdAt: '2026-01-12T20:30:00',
+    isRead: true,
+  },
+  {
+    _id: '5',
+    title: 'Hệ thống',
+    description: 'Bảo trì lúc 23:00',
+    createdAt: '2026-01-12T18:00:00',
+    isRead: false,
+  },
+];
+const latestNotifications = mockNotifications
+  .slice(0, 10);
+const unreadCount = mockNotifications.filter(n => !n.isRead).length;
+
+
+const { Text } = Typography;
+const notificationContent = (
+  <div style={{ width: 320, maxHeight: 400, overflowY: 'auto' }}>
+    <List
+      dataSource={latestNotifications}
+      renderItem={(item) => (
+        <List.Item
+          key={item._id}
+          style={{
+            cursor: 'pointer',
+            background: item.isRead ? '#fff' : '#f6f8ff',
+          }}
+        >
+          <List.Item.Meta
+            title={
+              <Text strong={!item.isRead}>
+                {item.title}
+              </Text>
+            }
+            description={item.description}
+          />
+        </List.Item>
+      )}
+    />
+
+    <div
+      style={{
+        textAlign: 'center',
+        padding: '8px',
+        borderTop: '1px solid #f0f0f0',
+        cursor: 'pointer',
+        color: '#1677ff',
+      }}
+    >
+      Xem tất cả
+    </div>
+  </div>
+);
+
 
 return(
    
@@ -123,14 +207,31 @@ return(
 
                 </Loadingcom>
 
-                {!isHiddentCart && (
+                {/* {!isHiddentCart && (
                 <div>
                     <BellOutlined style={{ fontSize: `30px`, color: `#fff` }} />
                     <Badge count = {order?.length} size="small">
                     <WrapperTextHeaderSmall onClick={()=> {navigate('/Order')}} ></WrapperTextHeaderSmall>
                     </Badge>
                 </div>
-                  )}
+                  )} */}
+
+                  <Dropdown
+  overlay={notificationContent}
+  trigger={['click']}
+  placement="bottomRight"
+>
+  <Badge count={unreadCount} size="small">
+    <BellOutlined
+      style={{
+        fontSize: 30,
+        color: '#fff',
+        cursor: 'pointer',
+      }}
+    />
+  </Badge>
+</Dropdown>
+
                 
             </Col>
         </WrapperHeader>       

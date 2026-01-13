@@ -22,7 +22,7 @@ import {
 } from '@ant-design/icons';
 import * as MyIoTService from '../../services/IoTServices';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const { Title, Text } = Typography;
 
@@ -30,10 +30,10 @@ const FanControlPage = () => {
   const [power, setPower] = useState(false);
   const [speed, setSpeed] = useState(0);
   const [mode, setMode] = useState('no');
-
+ const queryClient = useQueryClient();
   const isFirstLoad = useRef(true);
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const { id } = useParams();
 
   /* ================= API ================= */
@@ -122,6 +122,9 @@ const autoMutation = useMutation({
 
   onSuccess: (data) => {
     console.log('Auto mode success:', data);
+    queryClient.invalidateQueries({
+      queryKey: ['fetchFanById'], 
+    });
     setMode('Auto');
   },
 
@@ -221,8 +224,10 @@ const autoMutation = useMutation({
           <Col span={6}>
             <ModeButton active={mode === 'Auto'} onClick={() => {handleAutoMode(fan.FAN_ID)}} >
               <RobotOutlined />
-              <span>tu dong</span>
+              <span>tự động /{fan?.Auto ? 'đang bật' : 'đang tắt'}</span>
+              
             </ModeButton>
+            
           </Col>
         </Row>
       </Card>
