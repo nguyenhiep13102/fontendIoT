@@ -66,6 +66,15 @@ export const modelAuto = async (fanId) => {
     return error.response?.data;
   }
 }; 
+export const  getLatestNotificationsByUser = async (userId) => {
+  try {
+    const res = await axios.post(`${env.API_URL}/fanroute/NotificationsByUser/${userId}` );
+    console.log('res service', data);
+    return res.data;
+  } catch (error) {
+    return error.response?.data;
+  }
+}; 
 
 export default {
     GetDeviceInformation,

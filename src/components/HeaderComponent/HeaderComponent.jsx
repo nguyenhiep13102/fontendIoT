@@ -15,13 +15,14 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {resetUser } from '../../redux/slides/userSide.jsx'
 import {SearchProduct } from '../../redux/slides/ProductSide.jsx'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Loadingcom from '../LoadingComponent/loading.jsx';
 import env from '../../../env.js'
-
+import * as MyIoTService from '../../services/IoTServices';
+import { useQuery } from "@tanstack/react-query";
 
 export const HeaderComponent = ({isHiddenSearch, isHiddentCart}) => {
-     
+     const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [loading , setloading] = useState(false);
@@ -33,7 +34,26 @@ export const HeaderComponent = ({isHiddenSearch, isHiddentCart}) => {
     console.log('order  o day co khong', order)
     const user = useSelector((state) => state.user)
     console.log('user', user);
-    
+useEffect(() => {
+  if (!user?._id) return;
+
+  fetch(
+    `http://localhost:5001/api/fanroute/NotificationsByUser/${user._id}`
+  )
+    .then(res => res.json())
+    .then(resData => {
+      console.log("🔔 notifications raw:", resData);
+
+     
+      setNotifications(Array.isArray(resData.data) ? resData.data : []);
+    })
+    .catch(err => console.error(err));
+}, [user?._id]);
+
+
+const latestNotifications = notifications.slice(0, 10);
+const unreadCount = notifications.filter(n => !n.isRead).length;
+
 const handleLogout =  async () => {
  
    setloading(true)
@@ -64,86 +84,109 @@ const handleSearch = () => {
     dispatch(SearchProduct(search))
 };
 
-const mockNotifications = [
-  {
-    _id: '1',
-    title: 'Đơn hàng mới',
-    description: 'Bạn có đơn hàng #1001',
-    createdAt: '2026-01-13T08:30:00',
-    isRead: false,
-  },
-  {
-    _id: '2',
-    title: 'Thanh toán thành công',
-    description: 'Đơn hàng #1000 đã thanh toán',
-    createdAt: '2026-01-13T08:10:00',
-    isRead: false,
-  },
-  {
-    _id: '3',
-    title: 'Giao hàng',
-    description: 'Đơn hàng #0999 đang giao',
-    createdAt: '2026-01-12T22:00:00',
-    isRead: true,
-  },
-  {
-    _id: '4',
-    title: 'Khuyến mãi',
-    description: 'Giảm giá 20% cho đơn tiếp theo',
-    createdAt: '2026-01-12T20:30:00',
-    isRead: true,
-  },
-  {
-    _id: '5',
-    title: 'Hệ thống',
-    description: 'Bảo trì lúc 23:00',
-    createdAt: '2026-01-12T18:00:00',
-    isRead: false,
-  },
-];
-const latestNotifications = mockNotifications
-  .slice(0, 10);
-const unreadCount = mockNotifications.filter(n => !n.isRead).length;
+
+
 
 
 const { Text } = Typography;
 const notificationContent = (
-  <div style={{ width: 320, maxHeight: 400, overflowY: 'auto' }}>
-    <List
-      dataSource={latestNotifications}
-      renderItem={(item) => (
-        <List.Item
-          key={item._id}
-          style={{
-            cursor: 'pointer',
-            background: item.isRead ? '#fff' : '#f6f8ff',
-          }}
-        >
-          <List.Item.Meta
-            title={
-              <Text strong={!item.isRead}>
-                {item.title}
-              </Text>
-            }
-            description={item.description}
-          />
-        </List.Item>
-      )}
-    />
-
+  <div
+    style={{
+      width: 360,
+      maxHeight: 420,
+      background: '#fff',
+      borderRadius: 8,
+      boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+      overflow: 'hidden',
+    }}
+  >
+    {/* Header */}
     <div
       style={{
+        padding: '12px 16px',
+        fontSize: 16,
+        fontWeight: 600,
+        borderBottom: '1px solid #f0f0f0',
+      }}
+    >
+      Thông báo
+    </div>
+
+    {/* List */}
+    <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+      <List
+        dataSource={latestNotifications}
+        renderItem={(item) => (
+          <List.Item
+            key={item._id}
+            style={{
+              padding: '12px 16px',
+              cursor: 'pointer',
+              background: item.isRead ? '#fff' : '#f0f2ff',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = '#f5f5f5')
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = item.isRead ? '#fff' : '#f0f2ff')
+            }
+          >
+            <List.Item.Meta
+              title={
+                <Text
+                  style={{
+                    fontWeight: item.isRead ? 400 : 600,
+                    fontSize: 14,
+                  }}
+                >
+                  {item.title}
+                </Text>
+              }
+              description={
+                <div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: '#595959',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {item.description}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: '#8c8c8c',
+                    }}
+                  >
+                    {item.createdAt}
+                  </div>
+                </div>
+              }
+            />
+          </List.Item>
+        )}
+      />
+    </div>
+
+    {/* Footer */}
+    <div
+      style={{
+        padding: '10px',
         textAlign: 'center',
-        padding: '8px',
         borderTop: '1px solid #f0f0f0',
-        cursor: 'pointer',
+        fontSize: 14,
+        fontWeight: 500,
         color: '#1677ff',
+        cursor: 'pointer',
       }}
     >
       Xem tất cả
     </div>
   </div>
 );
+
 
 
 return(
@@ -216,21 +259,38 @@ return(
                 </div>
                   )} */}
 
-                  <Dropdown
-  overlay={notificationContent}
-  trigger={['click']}
-  placement="bottomRight"
+                  <div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    padding: '0 12px',
+  }}
 >
-  <Badge count={unreadCount} size="small">
-    <BellOutlined
-      style={{
-        fontSize: 30,
-        color: '#fff',
-        cursor: 'pointer',
-      }}
-    />
-  </Badge>
-</Dropdown>
+  <Dropdown
+    overlay={notificationContent}
+    trigger={['click']}
+    placement="bottomRight"
+    arrow
+  >
+    <Badge
+      count={0}
+      size="small"
+      offset={[-4, 4]}   // 🔥 chỉnh vị trí badge
+    >
+      <BellOutlined
+        style={{
+          fontSize: 28,
+          color: '#fff',
+          cursor: 'pointer',
+          lineHeight: 1,
+        }}
+      />
+    </Badge>
+  </Dropdown>
+</div>
+
 
                 
             </Col>
